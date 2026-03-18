@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { X, Check } from 'lucide-react'
@@ -29,8 +29,9 @@ export default function TaskModal({ task, onClose, onUpdate }: Props) {
   const [editCat,     setEditCat]     = useState(task.category)
   const [editDate,    setEditDate]    = useState(task.date)
   const [editTime,    setEditTime]    = useState(initTime)
-  const [showConfirm, setShowConfirm] = useState(false)
-  const [saving,      setSaving]      = useState(false)
+  const [showConfirm,  setShowConfirm]  = useState(false)
+  const [confirmClose, setConfirmClose] = useState(false) // Esc/배경 클릭으로 닫기 시도
+  const [saving,       setSaving]       = useState(false)
 
   const isDirty =
     editTitle.trim() !== task.title ||
@@ -39,7 +40,13 @@ export default function TaskModal({ task, onClose, onUpdate }: Props) {
     editDate         !== task.date ||
     editTime         !== initTime
 
-  const handleSave = async () => {
+  // 닫기 시도: 수정사항 있으면 확인 먼저
+  const requestClose = () => {
+    if (isDirty) { setConfirmClose(true); setShowConfirm(true) }
+    else onClose()
+  }
+
+  const handleSave = async (andClose = false) => {
     if (!editTitle.trim()) return
     setSaving(true)
     const updated: Task = {
@@ -60,19 +67,28 @@ export default function TaskModal({ task, onClose, onUpdate }: Props) {
     setSaving(false)
     onUpdate?.(updated)
     setShowConfirm(false)
+    setConfirmClose(false)
+    if (andClose || confirmClose) onClose()
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      if (showConfirm) { setShowConfirm(false); return }
-      onClose()
-    }
     if (e.key === 'Enter') {
       e.preventDefault()
-      if (showConfirm) { handleSave(); return }
+      if (showConfirm) { handleSave(confirmClose); return }
       if (isDirty) setShowConfirm(true)
     }
   }
+
+  // 전역 Esc 리스너
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      if (showConfirm) { setShowConfirm(false); setConfirmClose(false) }
+      else requestClose()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [showConfirm, isDirty])
 
   const inputCls = 'w-full bg-transparent focus:outline-none'
   const labelCls = 'block text-[11px] font-semibold text-stone-400 uppercase tracking-wider mb-1'
@@ -80,7 +96,7 @@ export default function TaskModal({ task, onClose, onUpdate }: Props) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
-      onClick={onClose}
+      onClick={requestClose}
     >
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
       <div
@@ -102,7 +118,7 @@ export default function TaskModal({ task, onClose, onUpdate }: Props) {
                 </button>
               ))}
             </div>
-            <button onClick={onClose} className="text-stone-400 hover:text-stone-600">
+            <button onClick={requestClose} className="text-stone-400 hover:text-stone-600">
               <X size={18} />
             </button>
           </div>
@@ -192,13 +208,21 @@ export default function TaskModal({ task, onClose, onUpdate }: Props) {
             <div className="flex items-center gap-2">
               <span className="text-xs text-white/60">Enter로 확인</span>
               <button
-                onClick={() => setShowConfirm(false)}
+                onClick={() => { setShowConfirm(false); setConfirmClose(false) }}
                 className="text-white/70 hover:text-white text-xs px-2 py-1 rounded"
               >
                 취소
               </button>
+              {confirmClose && (
+                <button
+                  onClick={onClose}
+                  className="text-white/70 hover:text-white text-xs px-2 py-1 rounded"
+                >
+                  버리기
+                </button>
+              )}
               <button
-                onClick={handleSave}
+                onClick={() => handleSave(confirmClose)}
                 disabled={saving}
                 className="flex items-center gap-1 bg-white text-reddy-600 text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-reddy-50 transition-colors disabled:opacity-50"
               >
