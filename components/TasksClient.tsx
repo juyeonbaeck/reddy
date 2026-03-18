@@ -101,7 +101,7 @@ export default function TasksClient() {
       ) : (
         filtered.map(t => (
           <TaskItem key={t.id} task={t} onOpen={setSelected}
-            onToggle={(id, is_done) => updateTask(id, { is_done })} />
+            onToggle={(id, is_done) => { updateTask(id, { is_done }); toggleDone(id, is_done) }} />
         ))
       )}
 

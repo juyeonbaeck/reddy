@@ -10,7 +10,7 @@ type Tab = typeof TABS[number]
 
 export default function CalendarPage() {
   const [tab, setTab] = useState<Tab>('월별')
-  const { tasks, loading, updateTask } = useTasks()
+  const { tasks, loading, updateTask, toggleDone } = useTasks()
   const [selected, setSelected] = useState<Task | null>(null)
 
   return (
@@ -30,9 +30,9 @@ export default function CalendarPage() {
         <p className="text-sm text-stone-400 text-center py-12">불러오는 중...</p>
       ) : (
         <>
-          {tab === '월별' && <CalendarMonthly tasks={tasks} onOpen={setSelected} onToggle={(id, is_done) => updateTask(id, { is_done })} />}
-          {tab === '주별' && <CalendarWeekly  tasks={tasks} onOpen={setSelected} onToggle={(id, is_done) => updateTask(id, { is_done })} />}
-          {tab === '일별' && <CalendarDaily   tasks={tasks} onOpen={setSelected} onToggle={(id, is_done) => updateTask(id, { is_done })} />}
+          {tab === '월별' && <CalendarMonthly tasks={tasks} onOpen={setSelected} onToggle={(id, is_done) => { updateTask(id, { is_done }); toggleDone(id, is_done) }} />}
+          {tab === '주별' && <CalendarWeekly  tasks={tasks} onOpen={setSelected} onToggle={(id, is_done) => { updateTask(id, { is_done }); toggleDone(id, is_done) }} />}
+          {tab === '일별' && <CalendarDaily   tasks={tasks} onOpen={setSelected} onToggle={(id, is_done) => { updateTask(id, { is_done }); toggleDone(id, is_done) }} />}
         </>
       )}
 

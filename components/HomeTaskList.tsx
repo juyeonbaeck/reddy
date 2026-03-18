@@ -7,7 +7,7 @@ import TaskItem from '@/components/TaskItem'
 import TaskModal from '@/components/TaskModal'
 
 export default function HomeTaskList({ date }: { date: string }) {
-  const { tasks, updateTask } = useTasks(date)
+  const { tasks, updateTask, toggleDone } = useTasks(date)
   const [selected, setSelected] = useState<Task | null>(null)
 
   if (tasks.length === 0) {
@@ -23,7 +23,7 @@ export default function HomeTaskList({ date }: { date: string }) {
     <>
       {tasks.map(t => (
         <TaskItem key={t.id} task={t} onOpen={setSelected}
-          onToggle={(id, is_done) => updateTask(id, { is_done })} />
+          onToggle={(id, is_done) => { updateTask(id, { is_done }); toggleDone(id, is_done) }} />
       ))}
       {selected && (
         <TaskModal

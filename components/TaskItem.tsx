@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { Check } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { Task, supabase } from '@/lib/supabase'
+import { Task } from '@/lib/supabase'
 
 const CAT_LABEL: Record<string, string> = { Study: '학습', JobApp: '취준', Personal: '개인' }
 const CAT_STYLE: Record<string, string> = {
@@ -23,12 +23,11 @@ export default function TaskItem({ task, onOpen, onToggle }: Props) {
 
   useEffect(() => { setDone(task.is_done) }, [task.is_done])
 
-  const handleToggle = async (e: React.MouseEvent) => {
+  const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation()
     const next = !done
     setDone(next)
-    onToggle?.(task.id, next)  // 부모 tasks 배열 즉시 반영
-    await supabase.from('tasks').update({ is_done: next }).eq('id', task.id)
+    onToggle?.(task.id, next)
   }
 
   return (
