@@ -1,8 +1,8 @@
 'use client'
+import { useState, useEffect } from 'react'
 import { Check } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { Task } from '@/lib/supabase'
-import { useTasks } from '@/hooks/useTasks'
+import { Task, supabase } from '@/lib/supabase'
 
 const CAT_LABEL: Record<string, string> = { Study: '학습', JobApp: '취준', Personal: '개인' }
 const CAT_STYLE: Record<string, string> = {
@@ -12,26 +12,35 @@ const CAT_STYLE: Record<string, string> = {
 }
 
 export default function TaskItem({ task, onOpen }: { task: Task; onOpen?: (task: Task) => void }) {
-  const { toggleDone } = useTasks()
   const router = useRouter()
+  const [done, setDone] = useState(task.is_done)
+
+  useEffect(() => { setDone(task.is_done) }, [task.is_done])
+
+  const handleToggle = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const next = !done
+    setDone(next)  // 즉시 반영
+    await supabase.from('tasks').update({ is_done: next }).eq('id', task.id)
+  }
 
   return (
     <div
       onClick={() => onOpen ? onOpen(task) : router.push(`/tasks/${task.id}`)}
       className={`flex items-center gap-3 bg-white border border-stone-100 rounded-xl
         px-3 py-2.5 mb-1.5 cursor-pointer hover:shadow-sm transition-shadow
-        ${task.is_done ? 'opacity-50' : ''}`}
+        ${done ? 'opacity-50' : ''}`}
     >
       <button
-        onClick={e => { e.stopPropagation(); toggleDone(task.id, !task.is_done) }}
+        onClick={handleToggle}
         className={`w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center border-2 transition-colors
-          ${task.is_done ? 'bg-reddy-500 border-reddy-500' : 'border-stone-300 hover:border-reddy-400'}`}
+          ${done ? 'bg-reddy-500 border-reddy-500' : 'border-stone-300 hover:border-reddy-400'}`}
       >
-        {task.is_done && <Check size={10} className="text-white" strokeWidth={3} />}
+        {done && <Check size={10} className="text-white" strokeWidth={3} />}
       </button>
 
       <span className={`text-sm font-medium flex-1
-        ${task.is_done ? 'line-through text-stone-400' : 'text-stone-800'}`}>
+        ${done ? 'line-through text-stone-400' : 'text-stone-800'}`}>
         {task.title}
       </span>
 
