@@ -80,17 +80,50 @@ export default function TasksClient() {
         </button>
       </div>
 
+      {/* 필터 */}
+      <div className="flex gap-2 flex-wrap mb-4">
+        {FILTERS.map(f => (
+          <button
+            key={f.value}
+            onClick={() => setFilter(f.value)}
+            className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors
+              ${filter === f.value
+                ? 'bg-reddy-500 text-white border-reddy-500'
+                : 'bg-white text-stone-500 border-stone-200 hover:border-reddy-300'}`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      {/* 목록 */}
+      {loading ? (
+        <p className="text-center text-stone-300 text-sm py-12">불러오는 중...</p>
+      ) : filtered.length === 0 ? (
+        <p className="text-center text-stone-400 text-sm py-12">
+          할 일 없음.{' '}
+          <button onClick={() => setShowAdd(true)} className="text-reddy-500 underline">
+            추가하기
+          </button>
+        </p>
+      ) : (
+        filtered.map(t => <TaskItem key={t.id} task={t} onOpen={setSelected} />)
+      )}
+
       {/* 인라인 추가 폼 */}
       {showAdd && (
         <form
           onSubmit={handleAdd}
-          className="bg-white border border-reddy-100 rounded-xl px-4 py-3 mb-4 flex flex-col gap-2.5 shadow-sm"
+          className="bg-white border border-reddy-100 rounded-xl px-4 py-3 mt-2 flex flex-col gap-2.5 shadow-sm"
         >
           <input
             autoFocus
             value={addTitle}
             onChange={e => setAddTitle(e.target.value)}
-            onKeyDown={e => e.key === 'Escape' && setShowAdd(false)}
+            onKeyDown={e => {
+              if (e.key === 'Escape') setShowAdd(false)
+              if (e.key === 'Enter') { e.preventDefault(); handleAdd() }
+            }}
             placeholder="할 일 제목..."
             className="w-full text-sm text-stone-800 placeholder:text-stone-300 focus:outline-none"
           />
@@ -120,36 +153,6 @@ export default function TasksClient() {
             </button>
           </div>
         </form>
-      )}
-
-      {/* 필터 */}
-      <div className="flex gap-2 flex-wrap mb-4">
-        {FILTERS.map(f => (
-          <button
-            key={f.value}
-            onClick={() => setFilter(f.value)}
-            className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors
-              ${filter === f.value
-                ? 'bg-reddy-500 text-white border-reddy-500'
-                : 'bg-white text-stone-500 border-stone-200 hover:border-reddy-300'}`}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
-
-      {/* 목록 */}
-      {loading ? (
-        <p className="text-center text-stone-300 text-sm py-12">불러오는 중...</p>
-      ) : filtered.length === 0 ? (
-        <p className="text-center text-stone-400 text-sm py-12">
-          할 일 없음.{' '}
-          <button onClick={() => setShowAdd(true)} className="text-reddy-500 underline">
-            추가하기
-          </button>
-        </p>
-      ) : (
-        filtered.map(t => <TaskItem key={t.id} task={t} onOpen={setSelected} />)
       )}
 
       {/* 상세 모달 */}
