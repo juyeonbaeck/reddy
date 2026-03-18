@@ -11,13 +11,13 @@ const CAT_STYLE: Record<string, string> = {
   Personal: 'bg-green-50 text-green-800',
 }
 
-export default function TaskItem({ task }: { task: Task }) {
+export default function TaskItem({ task, onOpen }: { task: Task; onOpen?: (task: Task) => void }) {
   const { toggleDone } = useTasks()
   const router = useRouter()
 
   return (
     <div
-      onClick={() => router.push(`/tasks/${task.id}`)}
+      onClick={() => onOpen ? onOpen(task) : router.push(`/tasks/${task.id}`)}
       className={`flex items-center gap-3 bg-white border border-stone-100 rounded-xl
         px-3 py-2.5 mb-1.5 cursor-pointer hover:shadow-sm transition-shadow
         ${task.is_done ? 'opacity-50' : ''}`}

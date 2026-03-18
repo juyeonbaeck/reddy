@@ -4,6 +4,7 @@ import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import Link from 'next/link'
 import TaskItem from '@/components/TaskItem'
+import GoogleSignInButton from '@/components/GoogleSignInButton'
 
 const QUOTES = [
   '오늘의 노력이 내일의 기회를 만든다.',
@@ -16,6 +17,39 @@ const QUOTES = [
 export default async function HomePage() {
   const supabase = createServerComponentClient({ cookies })
   const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex">
+        <div className="hidden md:flex w-[280px] flex-shrink-0 bg-reddy-500 flex-col justify-between p-10 relative overflow-hidden">
+          <div className="absolute w-56 h-56 rounded-full border-[40px] border-white/5 -bottom-16 -right-16" />
+          <div className="absolute w-32 h-32 rounded-full border-[28px] border-white/[0.04] top-12 right-6" />
+          <div>
+            <p className="font-serif text-3xl text-white tracking-tight">Reddy</p>
+            <p className="text-xs text-white/50 mt-1">취준 생산성 대시보드</p>
+          </div>
+          <div className="relative z-10">
+            <p className="font-serif text-base text-white/90 leading-relaxed">
+              &ldquo;준비된 자에게<br />기회는 반드시 온다.&rdquo;
+            </p>
+            <p className="text-xs text-white/40 mt-2 italic">— Reddy Daily Quote</p>
+          </div>
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center gap-6 p-8 bg-white">
+          <div className="text-center mb-2">
+            <p className="font-serif text-2xl text-reddy-500 md:hidden mb-1">Reddy</p>
+            <h2 className="text-xl font-semibold text-stone-800">시작하기</h2>
+            <p className="text-sm text-stone-400 mt-1">Google 계정으로 바로 로그인하세요</p>
+          </div>
+          <GoogleSignInButton />
+          <Link href="/login" className="text-xs text-stone-400 hover:text-stone-600 underline underline-offset-2">
+            이메일로 로그인
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   const today = format(new Date(), 'yyyy-MM-dd')
 
   const { data: todayTasks } = await supabase

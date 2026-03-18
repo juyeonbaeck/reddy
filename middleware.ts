@@ -9,7 +9,9 @@ export async function middleware(req: NextRequest) {
   const isLogin    = req.nextUrl.pathname.startsWith('/login')
   const isCallback = req.nextUrl.pathname.startsWith('/auth')
 
-  if (!session && !isLogin && !isCallback) {
+  const isHome = req.nextUrl.pathname === '/'
+
+  if (!session && !isLogin && !isCallback && !isHome) {
     return NextResponse.redirect(new URL('/login', req.url))
   }
   if (session && isLogin) {
