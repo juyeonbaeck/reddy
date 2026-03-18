@@ -181,7 +181,7 @@ export default function TaskModal({ task, onClose, onUpdate }: Props) {
             </button>
             {isDirty && (
               <button
-                onClick={handleSave}
+                onClick={() => handleSave()}
                 disabled={saving}
                 className="flex items-center gap-1 bg-reddy-500 text-white text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-reddy-600 transition-colors disabled:opacity-50"
               >
