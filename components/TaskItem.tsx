@@ -11,7 +11,13 @@ const CAT_STYLE: Record<string, string> = {
   Personal: 'bg-green-50 text-green-800',
 }
 
-export default function TaskItem({ task, onOpen }: { task: Task; onOpen?: (task: Task) => void }) {
+type Props = {
+  task: Task
+  onOpen?: (task: Task) => void
+  onToggle?: (id: string, is_done: boolean) => void
+}
+
+export default function TaskItem({ task, onOpen, onToggle }: Props) {
   const router = useRouter()
   const [done, setDone] = useState(task.is_done)
 
@@ -20,7 +26,8 @@ export default function TaskItem({ task, onOpen }: { task: Task; onOpen?: (task:
   const handleToggle = async (e: React.MouseEvent) => {
     e.stopPropagation()
     const next = !done
-    setDone(next)  // 즉시 반영
+    setDone(next)
+    onToggle?.(task.id, next)  // 부모 tasks 배열 즉시 반영
     await supabase.from('tasks').update({ is_done: next }).eq('id', task.id)
   }
 

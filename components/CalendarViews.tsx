@@ -14,10 +14,14 @@ const DAYS = ['일', '월', '화', '수', '목', '금', '토']
 const navBtn = 'p-1.5 border border-stone-200 rounded-lg hover:bg-reddy-50 transition-colors'
 const navTitle = 'font-serif text-xl text-reddy-500 text-center min-w-[150px]'
 
-type ViewProps = { tasks: Task[]; onOpen: (task: Task) => void }
+type ViewProps = {
+  tasks: Task[]
+  onOpen: (task: Task) => void
+  onToggle: (id: string, is_done: boolean) => void
+}
 
 // ── Monthly ───────────────────────────────────────────────
-export function CalendarMonthly({ tasks, onOpen }: ViewProps) {
+export function CalendarMonthly({ tasks, onOpen, onToggle }: ViewProps) {
   const [cur, setCur]      = useState(new Date())
   const [sel, setSel]      = useState(new Date())
 
@@ -83,14 +87,14 @@ export function CalendarMonthly({ tasks, onOpen }: ViewProps) {
       </p>
       {selectedTasks.length === 0
         ? <p className="text-sm text-stone-400 text-center py-6">일정 없음</p>
-        : selectedTasks.map(t => <TaskItem key={t.id} task={t} onOpen={onOpen} />)
+        : selectedTasks.map(t => <TaskItem key={t.id} task={t} onOpen={onOpen} onToggle={onToggle} />)
       }
     </div>
   )
 }
 
 // ── Weekly ────────────────────────────────────────────────
-export function CalendarWeekly({ tasks, onOpen }: ViewProps) {
+export function CalendarWeekly({ tasks, onOpen, onToggle }: ViewProps) {
   const [weekStart, setWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 0 }))
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
   const tasksOn = (d: Date) => tasks.filter(t => isSameDay(new Date(t.date), d))
@@ -120,7 +124,7 @@ export function CalendarWeekly({ tasks, onOpen }: ViewProps) {
             </p>
             {dayTasks.length === 0
               ? <p className="text-xs text-stone-300 pl-1 pb-1">일정 없음</p>
-              : dayTasks.map(t => <TaskItem key={t.id} task={t} onOpen={onOpen} />)
+              : dayTasks.map(t => <TaskItem key={t.id} task={t} onOpen={onOpen} onToggle={onToggle} />)
             }
           </div>
         )
@@ -130,7 +134,7 @@ export function CalendarWeekly({ tasks, onOpen }: ViewProps) {
 }
 
 // ── Daily ─────────────────────────────────────────────────
-export function CalendarDaily({ tasks, onOpen }: ViewProps) {
+export function CalendarDaily({ tasks, onOpen, onToggle }: ViewProps) {
   const [day, setDay] = useState(new Date())
   const dayTasks = tasks.filter(t => isSameDay(new Date(t.date), day))
   const done     = dayTasks.filter(t => t.is_done).length
@@ -160,7 +164,7 @@ export function CalendarDaily({ tasks, onOpen }: ViewProps) {
 
       {dayTasks.length === 0
         ? <p className="text-sm text-stone-400 text-center py-8">일정 없음</p>
-        : dayTasks.map(t => <TaskItem key={t.id} task={t} onOpen={onOpen} />)
+        : dayTasks.map(t => <TaskItem key={t.id} task={t} onOpen={onOpen} onToggle={onToggle} />)
       }
     </div>
   )

@@ -21,7 +21,10 @@ export default function HomeTaskList({ date }: { date: string }) {
 
   return (
     <>
-      {tasks.map(t => <TaskItem key={t.id} task={t} onOpen={setSelected} />)}
+      {tasks.map(t => (
+        <TaskItem key={t.id} task={t} onOpen={setSelected}
+          onToggle={(id, is_done) => updateTask(id, { is_done })} />
+      ))}
       {selected && (
         <TaskModal
           task={selected}

@@ -99,7 +99,10 @@ export default function TasksClient() {
           </button>
         </p>
       ) : (
-        filtered.map(t => <TaskItem key={t.id} task={t} onOpen={setSelected} />)
+        filtered.map(t => (
+          <TaskItem key={t.id} task={t} onOpen={setSelected}
+            onToggle={(id, is_done) => updateTask(id, { is_done })} />
+        ))
       )}
 
       {/* 인라인 추가 폼 */}

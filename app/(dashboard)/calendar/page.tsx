@@ -30,9 +30,9 @@ export default function CalendarPage() {
         <p className="text-sm text-stone-400 text-center py-12">불러오는 중...</p>
       ) : (
         <>
-          {tab === '월별' && <CalendarMonthly tasks={tasks} onOpen={setSelected} />}
-          {tab === '주별' && <CalendarWeekly  tasks={tasks} onOpen={setSelected} />}
-          {tab === '일별' && <CalendarDaily   tasks={tasks} onOpen={setSelected} />}
+          {tab === '월별' && <CalendarMonthly tasks={tasks} onOpen={setSelected} onToggle={(id, is_done) => updateTask(id, { is_done })} />}
+          {tab === '주별' && <CalendarWeekly  tasks={tasks} onOpen={setSelected} onToggle={(id, is_done) => updateTask(id, { is_done })} />}
+          {tab === '일별' && <CalendarDaily   tasks={tasks} onOpen={setSelected} onToggle={(id, is_done) => updateTask(id, { is_done })} />}
         </>
       )}
 
