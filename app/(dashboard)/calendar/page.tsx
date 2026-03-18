@@ -10,7 +10,7 @@ type Tab = typeof TABS[number]
 
 export default function CalendarPage() {
   const [tab, setTab] = useState<Tab>('월별')
-  const { tasks, loading } = useTasks()
+  const { tasks, loading, updateTask } = useTasks()
   const [selected, setSelected] = useState<Task | null>(null)
 
   return (
@@ -40,7 +40,7 @@ export default function CalendarPage() {
         <TaskModal
           task={selected}
           onClose={() => setSelected(null)}
-          onUpdate={updated => setSelected(updated)}
+          onUpdate={updated => { setSelected(updated); updateTask(updated.id, updated) }}
         />
       )}
     </div>

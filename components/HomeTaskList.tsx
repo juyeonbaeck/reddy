@@ -7,7 +7,7 @@ import TaskItem from '@/components/TaskItem'
 import TaskModal from '@/components/TaskModal'
 
 export default function HomeTaskList({ date }: { date: string }) {
-  const { tasks } = useTasks(date)
+  const { tasks, updateTask } = useTasks(date)
   const [selected, setSelected] = useState<Task | null>(null)
 
   if (tasks.length === 0) {
@@ -26,7 +26,7 @@ export default function HomeTaskList({ date }: { date: string }) {
         <TaskModal
           task={selected}
           onClose={() => setSelected(null)}
-          onUpdate={updated => setSelected(updated)}
+          onUpdate={updated => { setSelected(updated); updateTask(updated.id, updated) }}
         />
       )}
     </>

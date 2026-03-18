@@ -25,7 +25,7 @@ const FILTERS: { label: string; value: Filter }[] = [
 ]
 
 export default function TasksClient() {
-  const { tasks, loading, toggleDone, deleteTask } = useTasks()
+  const { tasks, loading, toggleDone, deleteTask, updateTask } = useTasks()
 
   const [filter,   setFilter]   = useState<Filter>('')
   const [showAdd,  setShowAdd]  = useState(false)
@@ -151,7 +151,7 @@ export default function TasksClient() {
         <TaskModal
           task={selected}
           onClose={() => setSelected(null)}
-          onUpdate={updated => setSelected(updated)}
+          onUpdate={updated => { setSelected(updated); updateTask(updated.id, updated) }}
         />
       )}
     </div>

@@ -32,5 +32,9 @@ export function useTasks(date?: string) {
     await supabase.from('tasks').delete().eq('id', id)
   }
 
-  return { tasks, loading, toggleDone, deleteTask }
+  const updateTask = (id: string, updates: Partial<Task>) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t))
+  }
+
+  return { tasks, loading, toggleDone, deleteTask, updateTask }
 }
