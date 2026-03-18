@@ -8,18 +8,39 @@ export function useTasks(date?: string) {
   const channelId = useRef(`tasks-${Math.random().toString(36).slice(2)}`)
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchAll = async () => {
       let q = supabase.from('tasks').select('*').order('date').order('created_at')
       if (date) q = q.eq('date', date)
       const { data } = await q
       setTasks(data ?? [])
       setLoading(false)
     }
-    fetch()
+    fetchAll()
 
     const ch = supabase
       .channel(channelId.current)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, fetch)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'tasks' },
+        (payload) => {
+          const t = payload.new as Task
+          if (date && t.date !== date) return
+          setTasks(prev => [...prev, t].sort((a, b) =>
+            a.date < b.date ? -1 : a.date > b.date ? 1 :
+            a.created_at < b.created_at ? -1 : 1
+          ))
+        }
+      )
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tasks' },
+        (payload) => {
+          const t = payload.new as Task
+          setTasks(prev => prev.map(existing => existing.id === t.id ? t : existing))
+        }
+      )
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'tasks' },
+        (payload) => {
+          const id = (payload.old as { id: string }).id
+          setTasks(prev => prev.filter(existing => existing.id !== id))
+        }
+      )
       .subscribe()
 
     return () => { supabase.removeChannel(ch) }
