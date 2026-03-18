@@ -140,7 +140,6 @@ export default function TaskModal({ task, onClose, onUpdate }: Props) {
           <textarea
             value={editDesc}
             onChange={e => { setEditDesc(e.target.value); setShowConfirm(false) }}
-            onKeyDown={handleKeyDown}
             placeholder="메모를 입력하세요..."
             rows={3}
             className={`text-sm text-stone-700 placeholder:text-stone-300 resize-none
