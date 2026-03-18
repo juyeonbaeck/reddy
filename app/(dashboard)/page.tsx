@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import Link from 'next/link'
-import TaskItem from '@/components/TaskItem'
+import HomeTaskList from '@/components/HomeTaskList'
 import GoogleSignInButton from '@/components/GoogleSignInButton'
 
 const QUOTES = [
@@ -105,14 +105,7 @@ export default async function HomePage() {
         <Link href="/tasks" className="text-xs text-reddy-500 hover:underline">전체 보기 →</Link>
       </div>
 
-      {tasks.length === 0 ? (
-        <p className="text-center text-stone-400 text-sm py-10">
-          오늘 일정이 없어요.{' '}
-          <Link href="/tasks/new" className="text-reddy-500 underline">추가하기</Link>
-        </p>
-      ) : (
-        tasks.map((t: any) => <TaskItem key={t.id} task={t} />)
-      )}
+      <HomeTaskList date={today} />
     </div>
   )
 }
