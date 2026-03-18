@@ -2,6 +2,8 @@
 import { useState } from 'react'
 import { useTasks } from '@/hooks/useTasks'
 import { CalendarMonthly, CalendarWeekly, CalendarDaily } from '@/components/CalendarViews'
+import TaskModal from '@/components/TaskModal'
+import { Task } from '@/lib/supabase'
 
 const TABS = ['월별', '주별', '일별'] as const
 type Tab = typeof TABS[number]
@@ -9,6 +11,7 @@ type Tab = typeof TABS[number]
 export default function CalendarPage() {
   const [tab, setTab] = useState<Tab>('월별')
   const { tasks, loading } = useTasks()
+  const [selected, setSelected] = useState<Task | null>(null)
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-8">
@@ -27,10 +30,18 @@ export default function CalendarPage() {
         <p className="text-sm text-stone-400 text-center py-12">불러오는 중...</p>
       ) : (
         <>
-          {tab === '월별' && <CalendarMonthly tasks={tasks} />}
-          {tab === '주별' && <CalendarWeekly  tasks={tasks} />}
-          {tab === '일별' && <CalendarDaily   tasks={tasks} />}
+          {tab === '월별' && <CalendarMonthly tasks={tasks} onOpen={setSelected} />}
+          {tab === '주별' && <CalendarWeekly  tasks={tasks} onOpen={setSelected} />}
+          {tab === '일별' && <CalendarDaily   tasks={tasks} onOpen={setSelected} />}
         </>
+      )}
+
+      {selected && (
+        <TaskModal
+          task={selected}
+          onClose={() => setSelected(null)}
+          onUpdate={updated => setSelected(updated)}
+        />
       )}
     </div>
   )
