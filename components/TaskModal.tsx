@@ -163,6 +163,16 @@ export default function TaskModal({ task, onClose, onUpdate }: Props) {
             >
               {isDone ? '✓ 완료됨' : '○ 완료 표시'}
             </button>
+            {isDirty && (
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="flex items-center gap-1 bg-reddy-500 text-white text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-reddy-600 transition-colors disabled:opacity-50"
+              >
+                <Check size={11} strokeWidth={3} />
+                {saving ? '저장 중...' : '저장'}
+              </button>
+            )}
             <button
               onClick={async () => {
                 if (!confirm('삭제할까요?')) return
