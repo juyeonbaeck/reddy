@@ -1,10 +1,11 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { supabase, Task } from '@/lib/supabase'
 
 export function useTasks(date?: string) {
   const [tasks,   setTasks]   = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
+  const channelId = useRef(`tasks-${Math.random().toString(36).slice(2)}`)
 
   useEffect(() => {
     const fetch = async () => {
@@ -17,7 +18,7 @@ export function useTasks(date?: string) {
     fetch()
 
     const ch = supabase
-      .channel('tasks')
+      .channel(channelId.current)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, fetch)
       .subscribe()
 
