@@ -28,6 +28,7 @@ type Props = {
 export default function TaskModal({ task, onClose, onUpdate }: Props) {
   const { toggleDone, deleteTask } = useTasks()
 
+  const [isDone,    setIsDone]    = useState(task.is_done)
   const [isEditing, setIsEditing] = useState(false)
   const [editTitle, setEditTitle] = useState(task.title)
   const [editDesc,  setEditDesc]  = useState(task.description ?? '')
@@ -153,7 +154,7 @@ export default function TaskModal({ task, onClose, onUpdate }: Props) {
         ) : (
           /* ── 상세 보기 ── */
           <>
-            <h2 className={`font-serif text-xl leading-snug mb-4 ${task.is_done ? 'line-through text-stone-400' : 'text-stone-900'}`}>
+            <h2 className={`font-serif text-xl leading-snug mb-4 ${isDone ? 'line-through text-stone-400' : 'text-stone-900'}`}>
               {task.title}
             </h2>
 
@@ -164,8 +165,8 @@ export default function TaskModal({ task, onClose, onUpdate }: Props) {
                 {task.start_time && ` · ${format(new Date(task.start_time), 'HH:mm')}`}
               </div>
               <div className="flex items-center gap-2">
-                <span>{task.is_done ? '✅' : '○'}</span>
-                {task.is_done ? '완료' : '미완료'}
+                <span>{isDone ? '✅' : '○'}</span>
+                {isDone ? '완료' : '미완료'}
               </div>
             </div>
 
@@ -177,16 +178,18 @@ export default function TaskModal({ task, onClose, onUpdate }: Props) {
 
             <div className="flex gap-2 pt-4 border-t border-stone-100">
               <button
-                onClick={async () => {
-                  await toggleDone(task.id, !task.is_done)
-                  onUpdate?.({ ...task, is_done: !task.is_done })
+                onClick={() => {
+                  const next = !isDone
+                  setIsDone(next)
+                  onUpdate?.({ ...task, is_done: next })
+                  toggleDone(task.id, next)
                 }}
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium border transition-colors
-                  ${task.is_done
+                  ${isDone
                     ? 'bg-reddy-50 text-reddy-600 border-reddy-200'
                     : 'bg-white text-stone-500 border-stone-200 hover:bg-reddy-50'}`}
               >
-                {task.is_done ? '✓ 완료됨' : '○ 완료 표시'}
+                {isDone ? '✓ 완료됨' : '○ 완료 표시'}
               </button>
               <button
                 onClick={() => setIsEditing(true)}
