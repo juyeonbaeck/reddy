@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
-import { X } from 'lucide-react'
+import { X, Check } from 'lucide-react'
 import { Task, supabase } from '@/lib/supabase'
 import { useTasks } from '@/hooks/useTasks'
 
@@ -11,13 +11,6 @@ const CATS = [
   { value: 'JobApp',   label: '취준', active: 'bg-blue-50 text-blue-800 border-blue-400'   },
   { value: 'Personal', label: '개인', active: 'bg-green-50 text-green-800 border-green-400' },
 ] as const
-
-const CAT_LABEL: Record<string, string> = { Study: '학습', JobApp: '취준', Personal: '개인' }
-const CAT_STYLE: Record<string, string> = {
-  Study:    'bg-reddy-50 text-reddy-700',
-  JobApp:   'bg-blue-50 text-blue-800',
-  Personal: 'bg-green-50 text-green-800',
-}
 
 type Props = {
   task: Task
@@ -28,19 +21,23 @@ type Props = {
 export default function TaskModal({ task, onClose, onUpdate }: Props) {
   const { toggleDone, deleteTask } = useTasks()
 
-  const [isDone,    setIsDone]    = useState(task.is_done)
-  const [isEditing, setIsEditing] = useState(false)
-  const [editTitle, setEditTitle] = useState(task.title)
-  const [editDesc,  setEditDesc]  = useState(task.description ?? '')
-  const [editCat,   setEditCat]   = useState(task.category)
-  const [editDate,  setEditDate]  = useState(task.date)
-  const [editTime,  setEditTime]  = useState(
-    task.start_time ? format(new Date(task.start_time), 'HH:mm') : ''
-  )
-  const [saving, setSaving] = useState(false)
+  const initTime = task.start_time ? format(new Date(task.start_time), 'HH:mm') : ''
 
-  const inputCls = 'w-full px-3 py-2 border border-stone-200 rounded-xl text-sm focus:outline-none focus:border-reddy-400 transition-colors'
-  const labelCls = 'block text-[11px] font-semibold text-stone-400 uppercase tracking-wider mb-1.5'
+  const [isDone,      setIsDone]      = useState(task.is_done)
+  const [editTitle,   setEditTitle]   = useState(task.title)
+  const [editDesc,    setEditDesc]    = useState(task.description ?? '')
+  const [editCat,     setEditCat]     = useState(task.category)
+  const [editDate,    setEditDate]    = useState(task.date)
+  const [editTime,    setEditTime]    = useState(initTime)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [saving,      setSaving]      = useState(false)
+
+  const isDirty =
+    editTitle.trim() !== task.title ||
+    editDesc.trim()  !== (task.description ?? '') ||
+    editCat          !== task.category ||
+    editDate         !== task.date ||
+    editTime         !== initTime
 
   const handleSave = async () => {
     if (!editTitle.trim()) return
@@ -62,8 +59,23 @@ export default function TaskModal({ task, onClose, onUpdate }: Props) {
     }).eq('id', task.id)
     setSaving(false)
     onUpdate?.(updated)
-    setIsEditing(false)
+    setShowConfirm(false)
   }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      if (showConfirm) { setShowConfirm(false); return }
+      onClose()
+    }
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      if (showConfirm) { handleSave(); return }
+      if (isDirty) setShowConfirm(true)
+    }
+  }
+
+  const inputCls = 'w-full bg-transparent focus:outline-none'
+  const labelCls = 'block text-[11px] font-semibold text-stone-400 uppercase tracking-wider mb-1'
 
   return (
     <div
@@ -72,143 +84,120 @@ export default function TaskModal({ task, onClose, onUpdate }: Props) {
     >
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
       <div
-        className="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+        className="relative bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
-        {/* 헤더 */}
-        <div className="flex items-center justify-between mb-4">
-          {isEditing ? (
-            <span className="text-sm font-semibold text-reddy-500">수정</span>
-          ) : (
-            <span className={`text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded ${CAT_STYLE[task.category]}`}>
-              {CAT_LABEL[task.category]}
-            </span>
-          )}
-          <button onClick={onClose} className="text-stone-400 hover:text-stone-600">
-            <X size={18} />
-          </button>
+        <div className="p-6 flex flex-col gap-4">
+          {/* 헤더 */}
+          <div className="flex items-center justify-between">
+            <div className="flex gap-1.5">
+              {CATS.map(c => (
+                <button
+                  key={c.value} type="button"
+                  onClick={() => { setEditCat(c.value); if (isDirty || c.value !== editCat) setShowConfirm(false) }}
+                  className={`px-3 py-0.5 rounded-full text-xs font-semibold border-2 transition-all
+                    ${editCat === c.value ? c.active : 'bg-white text-stone-300 border-stone-200'}`}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+            <button onClick={onClose} className="text-stone-400 hover:text-stone-600">
+              <X size={18} />
+            </button>
+          </div>
+
+          {/* 제목 */}
+          <input
+            value={editTitle}
+            onChange={e => { setEditTitle(e.target.value); setShowConfirm(false) }}
+            onKeyDown={handleKeyDown}
+            className={`font-serif text-xl text-stone-900 placeholder:text-stone-300 ${inputCls}
+              ${isDone ? 'line-through text-stone-400' : ''}`}
+            placeholder="제목"
+          />
+
+          {/* 날짜 · 시간 */}
+          <div className="flex items-center gap-3 text-sm text-stone-400">
+            <span>📅</span>
+            <input
+              type="date"
+              value={editDate}
+              onChange={e => { setEditDate(e.target.value); setShowConfirm(false) }}
+              onKeyDown={handleKeyDown}
+              className="text-sm text-stone-500 focus:outline-none focus:text-reddy-500 cursor-pointer"
+            />
+            <input
+              type="time"
+              value={editTime}
+              onChange={e => { setEditTime(e.target.value); setShowConfirm(false) }}
+              onKeyDown={handleKeyDown}
+              className="text-sm text-stone-500 focus:outline-none focus:text-reddy-500 cursor-pointer"
+            />
+          </div>
+
+          {/* 메모 */}
+          <textarea
+            value={editDesc}
+            onChange={e => { setEditDesc(e.target.value); setShowConfirm(false) }}
+            onKeyDown={handleKeyDown}
+            placeholder="메모를 입력하세요..."
+            rows={3}
+            className={`text-sm text-stone-700 placeholder:text-stone-300 resize-none
+              bg-stone-50 rounded-xl px-4 py-3 focus:outline-none focus:bg-stone-100 transition-colors ${inputCls}`}
+          />
+
+          {/* 액션 */}
+          <div className="flex items-center gap-2 pt-1 border-t border-stone-100">
+            <button
+              onClick={() => {
+                const next = !isDone
+                setIsDone(next)
+                onUpdate?.({ ...task, is_done: next })
+                toggleDone(task.id, next)
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors
+                ${isDone
+                  ? 'bg-reddy-50 text-reddy-600 border-reddy-200'
+                  : 'bg-white text-stone-500 border-stone-200 hover:bg-reddy-50'}`}
+            >
+              {isDone ? '✓ 완료됨' : '○ 완료 표시'}
+            </button>
+            <button
+              onClick={async () => {
+                if (!confirm('삭제할까요?')) return
+                await deleteTask(task.id)
+                onClose()
+              }}
+              className="ml-auto px-3 py-1.5 border border-red-100 text-red-400 rounded-xl text-xs hover:bg-red-50 transition-colors"
+            >
+              🗑️ 삭제
+            </button>
+          </div>
         </div>
 
-        {isEditing ? (
-          /* ── 수정 폼 ── */
-          <div className="space-y-3">
-            <div>
-              <label className={labelCls}>제목</label>
-              <input
-                autoFocus
-                value={editTitle}
-                onChange={e => setEditTitle(e.target.value)}
-                className={inputCls}
-              />
-            </div>
-            <div>
-              <label className={labelCls}>카테고리</label>
-              <div className="flex gap-2">
-                {CATS.map(c => (
-                  <button
-                    key={c.value} type="button"
-                    onClick={() => setEditCat(c.value)}
-                    className={`px-4 py-1.5 rounded-full text-xs font-semibold border-2 transition-all
-                      ${editCat === c.value ? c.active : 'bg-white text-stone-400 border-stone-200'}`}
-                  >
-                    {c.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className={labelCls}>날짜</label>
-                <input type="date" value={editDate} onChange={e => setEditDate(e.target.value)} className={inputCls} />
-              </div>
-              <div>
-                <label className={labelCls}>시작 시간</label>
-                <input type="time" value={editTime} onChange={e => setEditTime(e.target.value)} className={inputCls} />
-              </div>
-            </div>
-            <div>
-              <label className={labelCls}>메모</label>
-              <textarea
-                value={editDesc}
-                onChange={e => setEditDesc(e.target.value)}
-                rows={3}
-                className={`${inputCls} resize-none`}
-              />
-            </div>
-            <div className="flex gap-2 pt-2">
+        {/* 저장 확인 바 */}
+        {showConfirm && (
+          <div className="flex items-center justify-between bg-reddy-500 px-5 py-3">
+            <p className="text-sm text-white">저장할까요?</p>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-white/60">Enter로 확인</span>
               <button
-                onClick={handleSave}
-                disabled={!editTitle.trim() || saving}
-                className="flex-1 bg-reddy-500 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-reddy-600 transition-colors disabled:opacity-50"
-              >
-                {saving ? '저장 중...' : '저장'}
-              </button>
-              <button
-                onClick={() => setIsEditing(false)}
-                className="px-5 py-2.5 border border-stone-200 rounded-xl text-sm text-stone-500 hover:bg-stone-50 transition-colors"
+                onClick={() => setShowConfirm(false)}
+                className="text-white/70 hover:text-white text-xs px-2 py-1 rounded"
               >
                 취소
               </button>
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="flex items-center gap-1 bg-white text-reddy-600 text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-reddy-50 transition-colors disabled:opacity-50"
+              >
+                <Check size={12} strokeWidth={3} />
+                {saving ? '저장 중...' : '저장'}
+              </button>
             </div>
           </div>
-        ) : (
-          /* ── 상세 보기 ── */
-          <>
-            <h2 className={`font-serif text-xl leading-snug mb-4 ${isDone ? 'line-through text-stone-400' : 'text-stone-900'}`}>
-              {task.title}
-            </h2>
-
-            <div className="space-y-1.5 mb-4 text-sm text-stone-500">
-              <div className="flex items-center gap-2">
-                <span>📅</span>
-                {format(new Date(task.date), 'yyyy년 M월 d일 (EEE)', { locale: ko })}
-                {task.start_time && ` · ${format(new Date(task.start_time), 'HH:mm')}`}
-              </div>
-              <div className="flex items-center gap-2">
-                <span>{isDone ? '✅' : '○'}</span>
-                {isDone ? '완료' : '미완료'}
-              </div>
-            </div>
-
-            {task.description && (
-              <div className="bg-stone-50 rounded-xl px-4 py-3 text-sm text-stone-700 leading-relaxed mb-5">
-                {task.description}
-              </div>
-            )}
-
-            <div className="flex gap-2 pt-4 border-t border-stone-100">
-              <button
-                onClick={() => {
-                  const next = !isDone
-                  setIsDone(next)
-                  onUpdate?.({ ...task, is_done: next })
-                  toggleDone(task.id, next)
-                }}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium border transition-colors
-                  ${isDone
-                    ? 'bg-reddy-50 text-reddy-600 border-reddy-200'
-                    : 'bg-white text-stone-500 border-stone-200 hover:bg-reddy-50'}`}
-              >
-                {isDone ? '✓ 완료됨' : '○ 완료 표시'}
-              </button>
-              <button
-                onClick={() => setIsEditing(true)}
-                className="px-4 py-2 border border-stone-200 rounded-xl text-sm text-stone-600 hover:bg-stone-50 transition-colors"
-              >
-                ✏️ 수정
-              </button>
-              <button
-                onClick={async () => {
-                  if (!confirm('삭제할까요?')) return
-                  await deleteTask(task.id)
-                  onClose()
-                }}
-                className="ml-auto px-4 py-2 border border-red-100 text-red-400 rounded-xl text-sm hover:bg-red-50 transition-colors"
-              >
-                🗑️ 삭제
-              </button>
-            </div>
-          </>
         )}
       </div>
     </div>
