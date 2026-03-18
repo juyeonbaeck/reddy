@@ -60,7 +60,7 @@ export default function TasksClient() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-8">
+    <div className="max-w-2xl mx-auto px-4 md:px-6 py-5 md:py-8">
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-5">
         <h1 className="font-serif text-2xl text-reddy-500">할 일</h1>

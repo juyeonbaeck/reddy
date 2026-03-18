@@ -71,7 +71,7 @@ export default async function HomePage() {
   const displayName = user?.user_metadata?.full_name ?? user?.email?.split('@')[0] ?? '님'
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-8">
+    <div className="max-w-2xl mx-auto px-4 md:px-6 py-5 md:py-8">
       <div className="mb-6">
         <h1 className="font-serif text-2xl text-reddy-500">{greeting}, {displayName} 👋</h1>
         <p className="text-sm text-stone-400 mt-1">{format(now, 'yyyy년 M월 d일 EEEE', { locale: ko })}</p>

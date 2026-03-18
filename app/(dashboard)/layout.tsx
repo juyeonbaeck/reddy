@@ -1,6 +1,7 @@
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import Sidebar from '@/components/Sidebar'
+import BottomNav from '@/components/BottomNav'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = createServerComponentClient({ cookies })
@@ -13,7 +14,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <main className="flex-1 overflow-y-auto bg-surface">{children}</main>
+      <main className="flex-1 overflow-y-auto bg-surface pb-20 md:pb-0">{children}</main>
+      <BottomNav />
     </div>
   )
 }

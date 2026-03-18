@@ -101,6 +101,7 @@ export default function TaskModal({ task, onClose, onUpdate }: Props) {
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
       <div
         className="relative bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col overflow-hidden"
+        style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
         onClick={e => e.stopPropagation()}
       >
         <div className="p-6 flex flex-col gap-4">

@@ -20,7 +20,7 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-[210px] flex-shrink-0 bg-white border-r border-stone-100 flex flex-col">
+    <aside className="hidden md:flex w-[210px] flex-shrink-0 bg-white border-r border-stone-100 flex-col">
       {/* 로고 */}
       <div className="px-5 py-5 border-b border-stone-100">
         <p className="font-serif text-[22px] leading-none text-reddy-500 tracking-tight">Reddy</p>

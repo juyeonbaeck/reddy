@@ -14,7 +14,7 @@ export default function CalendarPage() {
   const [selected, setSelected] = useState<Task | null>(null)
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-8">
+    <div className="max-w-2xl mx-auto px-4 md:px-6 py-5 md:py-8">
       <div className="flex gap-1 mb-6 border-b border-stone-100">
         {TABS.map(t => (
           <button key={t} onClick={() => setTab(t)}
